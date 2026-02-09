@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { openai } from "@ai-sdk/openai";
 import { generateText, Output } from "ai";
 import { StoryRankingResponseSchema } from "@/app/lib/schemas/storyRanking";
+import { prisma } from "@/app/lib/prisma";
 
 interface Article {
   id: string;
@@ -66,6 +67,16 @@ ${articles
       }),
     });
 
+    await prisma.storyRanking.create({
+      data: {
+        articles: articles.map((a) => ({
+          id: a.id,
+          title: a.title,
+        })),
+        interests: interests,
+        rankedResult: result.output,
+      },
+    }); 
     return NextResponse.json(result.output);
   } catch (error) {
     console.error("Story selection error:", error);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
+import { prisma } from "@/app/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +24,12 @@ export async function POST(request: NextRequest) {
       model: openai("gpt-4-turbo"),
       system: SystemPrompt,
       prompt: text,
+    });
+    await prisma.summary.create({
+      data: {
+        originalText: text,
+        summary: summary.text,
+      },
     });
 
     return NextResponse.json({
